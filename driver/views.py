@@ -137,9 +137,9 @@ class VerifyEmail(views.APIView):
                 user.is_active = True
                 user.save()
 
-            return render(request, "student\email_verify.html")
+            return render(request, "email_verify.html")
         except jwt.ExpiredSignatureError as identifier:
-            return render(request, "student\email_verify.html")
+            return render(request, "email_verify.html")
 
 
 def login(request):

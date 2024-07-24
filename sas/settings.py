@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # added apps
     "events",
+    "customer_care",
     "driver",
     "case_details",
     # inside apps
