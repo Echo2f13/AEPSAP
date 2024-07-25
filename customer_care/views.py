@@ -16,7 +16,7 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
 
 from sas import settings
-from case_details.models import cc_person
+from case_details.models import Cc_person
 from case_details.models import User
 from django.core.mail import send_mail
 from sas.settings import EMAIL_HOST_USER
@@ -75,14 +75,17 @@ def signup(request):
                         last_name=last_name,
                     )
                     user.save()
-                    care_data = cc_person.objects.create(
+                    print("user created")
+                    care_data = Cc_person.objects.create(
                         cc_gov_id=gov_id,
                         phone_number=phone,
+                        user_cc=user,
                     )
                     care_data.save()
+                    print("cc created")
                     print("data received")
-                    c_id_data = cc_person.objects.filter(cc_gov_id=gov_id).first()
-                    c_id = c_id_data.id
+                    c_id_data = Cc_person.objects.filter(cc_gov_id=gov_id).first()
+                    c_id = c_id_data.cc_id
                     print(c_id)
                     user_email = User.objects.get(email=email)
                     print(user_email)

@@ -3,9 +3,9 @@ from django.contrib.auth.models import User
 
 
 # cc = customer care
-class cc_person(models.Model):
+class Cc_person(models.Model):
     cc_id = models.BigAutoField(primary_key="True", auto_created="True")
-    cc_gov_id = models.CharField(max_length=50, unique="True", null="True")
+    cc_gov_id = models.CharField(max_length=50, unique=True, null=False)
     cc_image = models.ImageField(null="True", upload_to="")
     phone_number = models.CharField(max_length=15, unique=True, null=False)
     photo = models.ImageField(null=True, upload_to="cc_photos/")
