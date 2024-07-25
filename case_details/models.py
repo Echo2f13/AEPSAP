@@ -17,7 +17,7 @@ class cc_person(models.Model):
 
     def _str_(self):
         return self.user.username
-
+ 
 
 class Driver(models.Model):
     license_number = models.CharField(max_length=50, unique=True, null=False)
