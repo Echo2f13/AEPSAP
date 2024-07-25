@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, date
 from django.db import IntegrityError
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 import socket
@@ -148,13 +149,11 @@ def login(request):
         password = request.POST["password"]
         incorrect_credentials = 0
         user_data = User.objects.filter(username=phone).first()
-        # stu_data = Driver.objects.filter(stu_reg_id=stu_reg_id).first()
         driver_data = Driver.objects.filter(user_driver=user_data).first()
+
         if driver_data:
             user = authenticate(request, username=phone, password=password)
             print(user)
-            user = str(user)
-            print("001")
             if User.objects.filter(username=phone).exists():
                 user_data = User.objects.filter(username=phone).first()
                 print("002")
@@ -165,7 +164,7 @@ def login(request):
                 ):
                     if user:
                         print("003")
-                        login(user)
+                        auth_login(request, user)
                         print("logged in after 003")
                         return redirect("driver_profile", pk=driver_data.id)
                         # return render(
@@ -214,6 +213,20 @@ def login(request):
     return render(request, "driver\login.html")
 
 
-def profile(request):
+def profile(request, pk):
     # cou = CourseData.objects.all().values()
-    return render(request, "driver/user_profile.html")
+    return render(
+        request,
+        "driver/driver_profile.html",
+        {
+            "user": User.objects.filter(id=pk),
+            "dri": Driver.objects.filter(user_driver=pk),
+        },
+    )
+
+
+def logout(request):
+    print("logout1")
+    auth_logout(request)
+    print("logout2")
+    return render(request, "driver\login.html")
