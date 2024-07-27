@@ -175,18 +175,12 @@
 
                                 <li class="nav-item">
                                     <button class="nav-link active" data-bs-toggle="tab"
-                                        data-bs-target="#profile-overview">Overview</button>
+                                        data-bs-target="#profile-overview">Case</button>
                                 </li>
 
                                 <li class="nav-item">
-                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">Edit
-                                        Profile</button>
-                                </li>
-
-
-                                <li class="nav-item">
-                                    <button class="nav-link" data-bs-toggle="tab"
-                                        data-bs-target="#profile-change-password">Change Password</button>
+                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">Add
+                                        +</button>
                                 </li>
 
                             </ul>
@@ -194,215 +188,166 @@
 
                                 <div class="tab-pane fade show active profile-overview" id="profile-overview">
 
-                                    <h5 class="card-title">Profile Details</h5>
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">#</th>
+                                                <th scope="col">Case ID</th>
+                                                <th scope="col">Patient Name</th>
+                                                <th scope="col">Point of Contact</th>
+                                                <th scope="col">Accident Type</th>
+                                                <th scope="col">Severity Level</th>
+                                                <th scope="col">Location</th>
+                                                <th scope="col">Date and Time</th>
+                                                <th scope="col">Ambulance</th>
+                                                <th scope="col">Description</th>
+                                                <th scope="col">First Responder Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for case in case %}
+                                            {% for user in user %}
+                                            {% if case.assigned_cc_person.user_cc_id == user.id %}
+                                            <tr {% if case.status == 0 %} class="table-danger" {% else %}
+                                                class="table-success" {% endif %}>
+                                                <th scope="row">{{ forloop.counter }}</th>
+                                                <td>{{ case.case_id }}</td>
+                                                <td>{{ case.Patient_name }}</td>
+                                                <td>{{ case.poc }}</td>
+                                                <td>{{ case.get_accident_type_display }}</td>
+                                                <td>{{ case.get_patient_severity_display }}</td>
+                                                <td>{{ case.location }}</td>
+                                                <td>{{ case.time_date }}</td>
+                                                <td>{{ case.ambulance }}</td>
+                                                <td>{{ case.description }}</td>
+                                                <td>{{ case.first_responder_notes }}</td>
+                                            </tr>
+                                            {% endif %}
+                                            {% endfor %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
 
-                                    <div class="row">
-                                        <div class="col-lg-3 col-md-4 label ">Full Name</div>
-                                        <div class="col-lg-9 col-md-8">Kevin Anderson</div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-lg-3 col-md-4 label">Company</div>
-                                        <div class="col-lg-9 col-md-8">Lueilwitz, Wisoky and Leuschke</div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-lg-3 col-md-4 label">Job</div>
-                                        <div class="col-lg-9 col-md-8">Web Designer</div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-lg-3 col-md-4 label">Country</div>
-                                        <div class="col-lg-9 col-md-8">USA</div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-lg-3 col-md-4 label">Address</div>
-                                        <div class="col-lg-9 col-md-8">A108 Adam Street, New York, NY 535022</div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-lg-3 col-md-4 label">Phone</div>
-                                        <div class="col-lg-9 col-md-8">(436) 486-3538 x29071</div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-lg-3 col-md-4 label">Email</div>
-                                        <div class="col-lg-9 col-md-8">k.anderson@example.com</div>
-                                    </div>
 
                                 </div>
 
                                 <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
 
                                     <!-- Profile Edit Form -->
-                                    <form>
-                                        <div class="row mb-3">
-                                            <label for="profileImage" class="col-md-4 col-lg-3 col-form-label">Profile
-                                                Image</label>
-                                            <div class="col-md-8 col-lg-9">
-                                                <img src="assets/img/profile-img.jpg" alt="Profile">
-                                                <div class="pt-2">
-                                                    <a href="#" class="btn btn-primary btn-sm"
-                                                        title="Upload new profile image"><i
-                                                            class="bi bi-upload"></i></a>
-                                                    <a href="#" class="btn btn-danger btn-sm"
-                                                        title="Remove my profile image"><i class="bi bi-trash"></i></a>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <form action="{% url 'add_case' %}" method="POST">
+                                        {% csrf_token %}
 
                                         <div class="row mb-3">
-                                            <label for="fullName" class="col-md-4 col-lg-3 col-form-label">Full
+                                            <label for="patient_name" class="col-md-4 col-lg-3 col-form-label">Patient
                                                 Name</label>
                                             <div class="col-md-8 col-lg-9">
-                                                <input name="fullName" type="text" class="form-control" id="fullName"
-                                                    value="Kevin Anderson">
+                                                <input name="patient_name" type="text" class="form-control"
+                                                    id="patient_name" placeholder="Enter patient name" required>
                                             </div>
                                         </div>
 
                                         <div class="row mb-3">
-                                            <label for="about" class="col-md-4 col-lg-3 col-form-label">About</label>
+                                            <label for="poc" class="col-md-4 col-lg-3 col-form-label">Point of
+                                                Contact</label>
                                             <div class="col-md-8 col-lg-9">
-                                                <textarea name="about" class="form-control" id="about"
-                                                    style="height: 100px">Sunt est soluta temporibus accusantium neque nam maiores cumque temporibus. Tempora libero non est unde veniam est qui dolor. Ut sunt iure rerum quae quisquam autem eveniet perspiciatis odit. Fuga sequi sed ea saepe at unde.</textarea>
+                                                <input name="poc" type="text" class="form-control" id="poc"
+                                                    placeholder="Enter point of contact" required>
                                             </div>
                                         </div>
 
                                         <div class="row mb-3">
-                                            <label for="company"
-                                                class="col-md-4 col-lg-3 col-form-label">Company</label>
+                                            <label for="accident_type" class="col-md-4 col-lg-3 col-form-label">Accident
+                                                Type</label>
                                             <div class="col-md-8 col-lg-9">
-                                                <input name="company" type="text" class="form-control" id="company"
-                                                    value="Lueilwitz, Wisoky and Leuschke">
+                                                <select name="accident_type" class="form-control" id="accident_type"
+                                                    required>
+                                                    <option value="" disabled selected>Select a Accident Types</option>
+                                                    {% for key, value in accident_types %}
+                                                    <option value="{{ key }}">{{ value }}</option>
+                                                    {% endfor %}
+                                                </select>
                                             </div>
                                         </div>
 
                                         <div class="row mb-3">
-                                            <label for="Job" class="col-md-4 col-lg-3 col-form-label">Job</label>
+                                            <label for="patient_severity"
+                                                class="col-md-4 col-lg-3 col-form-label">Severity Level</label>
                                             <div class="col-md-8 col-lg-9">
-                                                <input name="job" type="text" class="form-control" id="Job"
-                                                    value="Web Designer">
+                                                <select name="patient_severity" class="form-control"
+                                                    id="patient_severity" required>
+                                                    <option value="" disabled selected>Select a Severity Levels</option>
+                                                    {% for key, value in severity_levels %}
+                                                    <option value="{{ key }}">{{ value }}</option>
+                                                    {% endfor %}
+                                                </select>
                                             </div>
                                         </div>
 
                                         <div class="row mb-3">
-                                            <label for="Country"
-                                                class="col-md-4 col-lg-3 col-form-label">Country</label>
+                                            <label for="location"
+                                                class="col-md-4 col-lg-3 col-form-label">Location</label>
                                             <div class="col-md-8 col-lg-9">
-                                                <input name="country" type="text" class="form-control" id="Country"
-                                                    value="USA">
+                                                <input name="location" type="text" class="form-control" id="location"
+                                                    placeholder="Enter location" required>
+                                            </div>
+                                        </div>
+                                      
+                                        <div class="row mb-3" hidden>
+                                            <label for="status" class="col-md-4 col-lg-3 col-form-label">Status</label>
+                                            <div class="col-md-8 col-lg-9">
+                                                <input name="status" type="text" class="form-control" id="status"
+                                                    value="0" required>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <label for="ambulance"
+                                                class="col-md-4 col-lg-3 col-form-label">Ambulance</label>
+                                            <div class="col-md-8 col-lg-9">
+                                                <select name="ambulance" class="form-control" id="ambulance">
+                                                    <option value="" disabled selected>Select an ambulance</option>
+                                                    {% for ambulance in amb %}
+                                                    <option value="{{ ambulance.id }}">{{ ambulance }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3" hidden>
+                                            <label for="assigned_cc_person"
+                                                class="col-md-4 col-lg-3 col-form-label">Assigned Care Person</label>
+                                            <div class="col-md-8 col-lg-9">
+                                                {% for care in care %}
+                                                <input name="assigned_cc_person" value="{{ care.cc_id }}" type="text"
+                                                    class="form-control" id="assigned_cc_person" required>
+                                                {% endfor %}
                                             </div>
                                         </div>
 
                                         <div class="row mb-3">
-                                            <label for="Address"
-                                                class="col-md-4 col-lg-3 col-form-label">Address</label>
+                                            <label for="description"
+                                                class="col-md-4 col-lg-3 col-form-label">Description</label>
                                             <div class="col-md-8 col-lg-9">
-                                                <input name="address" type="text" class="form-control" id="Address"
-                                                    value="A108 Adam Street, New York, NY 535022">
+                                                <textarea name="description" class="form-control"
+                                                    id="description"></textarea>
                                             </div>
                                         </div>
 
                                         <div class="row mb-3">
-                                            <label for="Phone" class="col-md-4 col-lg-3 col-form-label">Phone</label>
+                                            <label for="first_responder_notes"
+                                                class="col-md-4 col-lg-3 col-form-label">First Responder Notes</label>
                                             <div class="col-md-8 col-lg-9">
-                                                <input name="phone" type="text" class="form-control" id="Phone"
-                                                    value="(436) 486-3538 x29071">
-                                            </div>
-                                        </div>
-
-                                        <div class="row mb-3">
-                                            <label for="Email" class="col-md-4 col-lg-3 col-form-label">Email</label>
-                                            <div class="col-md-8 col-lg-9">
-                                                <input name="email" type="email" class="form-control" id="Email"
-                                                    value="k.anderson@example.com">
-                                            </div>
-                                        </div>
-
-                                        <div class="row mb-3">
-                                            <label for="Twitter" class="col-md-4 col-lg-3 col-form-label">Twitter
-                                                Profile</label>
-                                            <div class="col-md-8 col-lg-9">
-                                                <input name="twitter" type="text" class="form-control" id="Twitter"
-                                                    value="https://twitter.com/#">
-                                            </div>
-                                        </div>
-
-                                        <div class="row mb-3">
-                                            <label for="Facebook" class="col-md-4 col-lg-3 col-form-label">Facebook
-                                                Profile</label>
-                                            <div class="col-md-8 col-lg-9">
-                                                <input name="facebook" type="text" class="form-control" id="Facebook"
-                                                    value="https://facebook.com/#">
-                                            </div>
-                                        </div>
-
-                                        <div class="row mb-3">
-                                            <label for="Instagram" class="col-md-4 col-lg-3 col-form-label">Instagram
-                                                Profile</label>
-                                            <div class="col-md-8 col-lg-9">
-                                                <input name="instagram" type="text" class="form-control" id="Instagram"
-                                                    value="https://instagram.com/#">
-                                            </div>
-                                        </div>
-
-                                        <div class="row mb-3">
-                                            <label for="Linkedin" class="col-md-4 col-lg-3 col-form-label">Linkedin
-                                                Profile</label>
-                                            <div class="col-md-8 col-lg-9">
-                                                <input name="linkedin" type="text" class="form-control" id="Linkedin"
-                                                    value="https://linkedin.com/#">
+                                                <textarea name="first_responder_notes" class="form-control"
+                                                    id="first_responder_notes"></textarea>
                                             </div>
                                         </div>
 
                                         <div class="text-center">
-                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                            <button type="submit" class="btn btn-primary">Add Case</button>
                                         </div>
-                                    </form><!-- End Profile Edit Form -->
+                                    </form>
+
 
                                 </div>
-
-
-
-                                <div class="tab-pane fade pt-3" id="profile-change-password">
-                                    <!-- Change Password Form -->
-                                    <form>
-
-                                        <div class="row mb-3">
-                                            <label for="currentPassword"
-                                                class="col-md-4 col-lg-3 col-form-label">Current Password</label>
-                                            <div class="col-md-8 col-lg-9">
-                                                <input name="password" type="password" class="form-control"
-                                                    id="currentPassword">
-                                            </div>
-                                        </div>
-
-                                        <div class="row mb-3">
-                                            <label for="newPassword" class="col-md-4 col-lg-3 col-form-label">New
-                                                Password</label>
-                                            <div class="col-md-8 col-lg-9">
-                                                <input name="newpassword" type="password" class="form-control"
-                                                    id="newPassword">
-                                            </div>
-                                        </div>
-
-                                        <div class="row mb-3">
-                                            <label for="renewPassword" class="col-md-4 col-lg-3 col-form-label">Re-enter
-                                                New Password</label>
-                                            <div class="col-md-8 col-lg-9">
-                                                <input name="renewpassword" type="password" class="form-control"
-                                                    id="renewPassword">
-                                            </div>
-                                        </div>
-
-                                        <div class="text-center">
-                                            <button type="submit" class="btn btn-primary">Change Password</button>
-                                        </div>
-                                    </form><!-- End Change Password Form -->
-
-                                </div>
-
                             </div><!-- End Bordered Tabs -->
 
                         </div>

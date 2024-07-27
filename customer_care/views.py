@@ -17,7 +17,8 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
 
 from sas import settings
-from case_details.models import Cc_person, Hospital, Ambulance, Driver
+from case_details.models import Cc_person, Hospital, Ambulance, Driver, Case
+from django.urls import reverse
 from case_details.models import User
 from django.core.mail import send_mail
 from sas.settings import EMAIL_HOST_USER
@@ -227,13 +228,69 @@ def care_case(request, pk):
         request,
         "customer_care/care_case.html",
         {
-            "user": User.objects.filter(id=pk),
-            "care": Cc_person.objects.filter(user_cc=pk),
+            "user": User.objects.filter(id=request.user.id),
+            "care": Cc_person.objects.filter(user_cc=request.user.id),
             "amb": Ambulance.objects.all(),
             "hos": Hospital.objects.all(),
             "dri": Driver.objects.all(),
+            "accident_types": Case.ACCIDENT_TYPES,
+            "severity_levels": Case.SEVERITY_LEVELS,
+            "case": Case.objects.all(),
         },
     )
+
+def add_case(request):
+    if request.method == 'POST':
+        patient_name = request.POST['patient_name']
+        poc = request.POST['poc']
+        accident_type = request.POST['accident_type']
+        patient_severity = request.POST['patient_severity']
+        location = request.POST['location']
+        status = request.POST['status']
+        ambulance_id = request.POST['ambulance']
+        assigned_cc_person_id = request.POST['assigned_cc_person']
+        description = request.POST.get('description', '')
+        first_responder_notes = request.POST.get('first_responder_notes', '')
+
+        ambulance = Ambulance.objects.get(id=ambulance_id) if ambulance_id else None
+        assigned_cc_person = Cc_person.objects.get(cc_id=assigned_cc_person_id) if assigned_cc_person_id else None
+        current_time_date = datetime.now()
+        new_case = Case(
+            Patient_name=patient_name,
+            poc=poc,
+            accident_type=accident_type,
+            patient_severity=patient_severity,
+            location=location,
+            time_date=current_time_date,
+            status=status,
+            ambulance=ambulance,
+            assigned_cc_person=assigned_cc_person,
+            description=description,
+            first_responder_notes=first_responder_notes,
+        )
+
+        new_case.save()
+
+        return redirect(
+            "care_case",
+            pk=request.user.id,
+        )  # Redirect to a success page or the list of cases
+    else:
+        return render(
+        request,
+        "customer_care/care_case.html",
+        {
+            "user": User.objects.filter(id=request.user.id),
+            "care": Cc_person.objects.filter(user_cc=request.user.id),
+            "amb": Ambulance.objects.all(),
+            "hos": Hospital.objects.all(),
+            "dri": Driver.objects.all(),
+            "accident_types": Case.ACCIDENT_TYPES,
+            "severity_levels": Case.SEVERITY_LEVELS,
+            "case": Case.objects.all(),
+        },
+    )
+
 
 
 def care_ambulance(request, pk):
