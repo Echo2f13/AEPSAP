@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, date
 from django.db import IntegrityError
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 import socket
@@ -40,7 +41,6 @@ from datetime import datetime, timedelta
 
 # to create xl sheet
 import xlsxwriter
-
 
 is_active_verify = False
 
@@ -129,4 +129,90 @@ def signup(request):
 
 
 def login(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+        incorrect_credentials = 0
+        user_data = User.objects.filter(username=username).first()
+        c_id_data = Cc_person.objects.filter(user_cc=user_data).first()
+        # print(c_id_data)
+        # c_id = c_id_data.id
+
+        if c_id_data:
+            user = authenticate(request, username=username, password=password)
+            print(user)
+            if User.objects.filter(username=username).exists():
+                user_data = User.objects.filter(username=username).first()
+                print("002")
+                if (
+                    user_data.is_active == True
+                    and user_data.is_staff == False
+                    and user_data.is_superuser == False
+                ):
+                    if user:
+                        print("003")
+                        auth_login(request, user)
+                        print("logged in after 003")
+                        return redirect("care_profile", pk=c_id_data.user_cc_id)
+                        # return render(
+                        #     request,
+                        #     "customer_care/care.html",
+                        #     {
+                        #         "user": User.objects.filter(username=username),
+                        #         "dri": Driver.objects.filter(user_driver=user_data),
+                        #     },
+                        # )
+                    else:
+                        print("004")
+                        print("NOT logged in after 004")
+                        return render(
+                            request,
+                            "customer_care\login.html",
+                        )
+                else:
+                    if user:
+                        print("005")
+                        print("not logged in after 004")
+                        return render(
+                            request,
+                            "customer_care\login.html",
+                        )
+                    else:
+                        print("006")
+                        return render(
+                            request,
+                            "customer_care\login.html",
+                        )
+            else:
+                # incorrect_credentials = 1
+                return render(
+                    request,
+                    "customer_care\login.html",
+                )
+        else:
+            print("passes else last")
+            return render(
+                request,
+                "customer_care\login.html",
+            )
+
+    # cou = CourseData.objects.all().values()
     return render(request, "customer_care\login.html")
+
+
+def profile(request, pk):
+    return render(
+        request,
+        "customer_care/care_profile.html",
+        {
+            "user": User.objects.filter(id=pk),
+            "dri": Cc_person.objects.filter(user_cc=pk),
+        },
+    )
+
+
+def logout(request):
+    print("logout1")
+    auth_logout(request)
+    print("logout2")
+    return render(request, "driver\login.html")
