@@ -6,11 +6,11 @@ STATUSES = [
     (1, "Closed"),
 ]
 
+
 # cc = customer care
 class Cc_person(models.Model):
     cc_id = models.BigAutoField(primary_key="True", auto_created="True")
     cc_gov_id = models.CharField(max_length=50, unique=True, null=False)
-    cc_image = models.ImageField(null="True", upload_to="")
     phone_number = models.CharField(max_length=15, unique=True, null=False)
     photo = models.ImageField(null=True, upload_to="cc_photos/")
 
@@ -21,7 +21,7 @@ class Cc_person(models.Model):
 
     def _str_(self):
         return self.user.username
- 
+
 
 class Driver(models.Model):
     license_number = models.CharField(max_length=50, unique=True, null=False)
@@ -75,6 +75,7 @@ class Ambulance(models.Model):
 class Hospital(models.Model):
     hospital_id = models.BigAutoField(primary_key=True, auto_created=True)
     name = models.CharField(max_length=200, unique=True, null=False)
+    address = models.CharField(max_length=1500, null=True)
 
     class Meta:
         db_table = "Hospital"
@@ -103,7 +104,6 @@ class Case(models.Model):
         ("MD", "Mild"),
         ("MIN", "Minor"),
     ]
-
 
     case_id = models.BigAutoField(primary_key=True, auto_created=True)
     Patient_name = models.CharField(max_length=35)

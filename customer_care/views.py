@@ -17,7 +17,7 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
 
 from sas import settings
-from case_details.models import Cc_person
+from case_details.models import Cc_person, Hospital, Ambulance, Driver
 from case_details.models import User
 from django.core.mail import send_mail
 from sas.settings import EMAIL_HOST_USER
@@ -229,6 +229,9 @@ def care_case(request, pk):
         {
             "user": User.objects.filter(id=pk),
             "care": Cc_person.objects.filter(user_cc=pk),
+            "amb": Ambulance.objects.all(),
+            "hos": Hospital.objects.all(),
+            "dri": Driver.objects.all(),
         },
     )
 
@@ -240,19 +243,143 @@ def care_ambulance(request, pk):
         {
             "user": User.objects.filter(id=pk),
             "care": Cc_person.objects.filter(user_cc=pk),
+            "amb": Ambulance.objects.all(),
+            "hos": Hospital.objects.all(),
+            "dri": Driver.objects.all(),
+        },
+    )
+
+
+def add_ambulance(request):
+    if request.method == "POST":
+        ambulance_number = request.POST["ambulance_number"]
+        ambulance_size = request.POST["ambulance_size"]
+        ambulance_model = request.POST["ambulance_model"]
+        hospital = request.POST["hospital"]
+        driver_1 = request.POST["driver_1"]
+        driver_2 = request.POST["driver_2"]
+        bystander_1 = request.POST["bystander_1"]
+        bystander_2 = request.POST["bystander_2"]
+        bystander_3 = request.POST["bystander_3"]
+        bystander_4 = request.POST["bystander_4"]
+        ambulance_photo = request.FILES.get("ambulance_photo")
+
+        # Create and save a new ambulance instance
+        user_1_id = User.objects.filter(username=driver_1).first()
+        user_2_id = User.objects.filter(username=driver_2).first()
+        hospital_id = Hospital.objects.filter(name=hospital).first()
+        driver_1_id = Driver.objects.filter(user_driver=user_1_id).first()
+        driver_2_id = Driver.objects.filter(user_driver=user_2_id).first()
+        new_ambulance = Ambulance(
+            ambulance_number=ambulance_number,
+            ambulance_size=ambulance_size,
+            ambulance_model=ambulance_model,
+            hospital_id=hospital_id.hospital_id,
+            driver_1_id=driver_1_id.id,
+            driver_2_id=driver_2_id.id,
+            bystander_1=bystander_1,
+            bystander_2=bystander_2,
+            bystander_3=bystander_3,
+            bystander_4=bystander_4,
+            ambulance_photo=ambulance_photo,
+        )
+        new_ambulance.save()
+
+        messages.success(request, "Ambulance added successfully.")
+        return redirect(
+            "care_ambulance",
+            pk=request.user.id,
+        )  # Redirect to the list of ambulances or another appropriate page
+
+    return render(
+        request,
+        "ambulance/add_ambulance.html",  # Path to your HTML template
+        {
+            "user": User.objects.filter(id=request.user.id).first(),
+            "care": Cc_person.objects.filter(user_cc=request.user.id).first(),
+            "amb": Ambulance.objects.all(),
+            "hos": Hospital.objects.all(),
+            "dri": Driver.objects.all(),
         },
     )
 
 
 def care_hospital(request, pk):
+    hospital = Hospital.objects.all()
     return render(
         request,
         "customer_care/care_hospital.html",
         {
             "user": User.objects.filter(id=pk),
             "care": Cc_person.objects.filter(user_cc=pk),
+            "hos": hospital,
         },
     )
+
+
+def add_hospital(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        address = request.POST.get("address")
+
+        if name and address:
+            # Create and save a new hospital instance
+            new_hospital = Hospital(name=name, address=address)
+            new_hospital.save()
+
+            messages.success(request, "Hospital added successfully.")
+            return redirect(
+                "care_hospital", pk=request.user.id
+            )  # Redirect to a page showing the list of hospitals or other appropriate page
+        else:
+            messages.error(request, "Please fill in all fields.")
+
+    return render(
+        request,
+        "customer_care/add_hospital.html",  # Use your template for adding a hospital
+        {
+            "user": User.objects.filter(id=request.user.id).first(),
+            "care": Cc_person.objects.filter(user_cc=request.user.id).first(),
+        },
+    )
+
+
+def edit_profile(request):
+    if request.method == "POST":
+        user_id = request.POST["user_id"]
+        user = User.objects.filter(id=user_id).first()
+        pk = user_id
+        cc_person = Cc_person.objects.filter(user_cc=user_id).first()
+        if "cc_image" in request.FILES:
+            cc_person.photo = request.FILES.get("cc_image")
+
+        if "firstName" in request.POST:
+            user.first_name = request.POST["firstName"]
+        if "lastName" in request.POST:
+            user.last_name = request.POST["lastName"]
+        if "phone" in request.POST:
+            cc_person.phone_number = request.POST["phone"]
+
+        # Save the updates
+        user.save()
+        cc_person.save()
+
+        messages.success(request, "Profile updated successfully.")
+        return redirect("care_profile", pk=pk)  # Redirect to the same page after update
+
+    return redirect("care_profile", pk=pk)
+
+
+def remove_profile_image(request):
+    cc_person = Cc_person.objects.filter(user_cc=request.user).first()
+    if cc_person and cc_person.photo:
+        cc_person.photo.delete()  # Deletes the file
+        cc_person.photo = None
+        cc_person.save()
+        messages.success(request, "Profile image removed successfully.")
+    else:
+        messages.error(request, "No profile image to remove.")
+    return redirect("care_profile", pk=cc_person.user_cc.id)
 
 
 def care_change_pass(request):
