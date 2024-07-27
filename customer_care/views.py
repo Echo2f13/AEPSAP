@@ -153,7 +153,7 @@ def login(request):
                         print("003")
                         auth_login(request, user)
                         print("logged in after 003")
-                        return redirect("care_profile", pk=c_id_data.user_cc_id)
+                        return redirect("care_dashboard", pk=c_id_data.user_cc_id)
                         # return render(
                         #     request,
                         #     "customer_care/care.html",
@@ -206,13 +206,81 @@ def profile(request, pk):
         "customer_care/care_profile.html",
         {
             "user": User.objects.filter(id=pk),
-            "dri": Cc_person.objects.filter(user_cc=pk),
+            "care": Cc_person.objects.filter(user_cc=pk),
         },
     )
+
+
+def dashboard(request, pk):
+    return render(
+        request,
+        "customer_care/dashboard.html",
+        {
+            "user": User.objects.filter(id=pk),
+            "care": Cc_person.objects.filter(user_cc=pk),
+        },
+    )
+
+
+def care_case(request, pk):
+    return render(
+        request,
+        "customer_care/care_case.html",
+        {
+            "user": User.objects.filter(id=pk),
+            "care": Cc_person.objects.filter(user_cc=pk),
+        },
+    )
+
+
+def care_ambulance(request, pk):
+    return render(
+        request,
+        "customer_care/care_ambulance.html",
+        {
+            "user": User.objects.filter(id=pk),
+            "care": Cc_person.objects.filter(user_cc=pk),
+        },
+    )
+
+
+def care_hospital(request, pk):
+    return render(
+        request,
+        "customer_care/care_hospital.html",
+        {
+            "user": User.objects.filter(id=pk),
+            "care": Cc_person.objects.filter(user_cc=pk),
+        },
+    )
+
+
+def care_change_pass(request):
+    if request.method == "POST":
+        user_id = request.POST["user_id"]
+        user = User.objects.filter(id=user_id).first()
+        pk = user_id
+        if "submit" in request.POST:
+            password = request.POST["password"]
+            check_current_password = check_password(password, user.password)
+            if check_current_password:
+                newpassword = request.POST["newpassword"]
+                renewpassword = request.POST["renewpassword"]
+                if newpassword == renewpassword:
+                    user.set_password(newpassword)
+                    user.save()
+                    messages.success(request, "Password successfully changed")
+                else:
+                    messages.error(request, "New passwords don't match")
+            else:
+                messages.error(request, "Old password you entered is wrong")
+        return redirect("care_profile", pk=pk)
+    else:
+        return redirect("care_profile", pk=pk)
 
 
 def logout(request):
     print("logout1")
     auth_logout(request)
     print("logout2")
-    return render(request, "driver\login.html")
+    return render(request, "customer_care\login.html")

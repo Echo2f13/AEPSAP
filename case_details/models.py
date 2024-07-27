@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+STATUSES = [
+    (0, "Open"),
+    (1, "Closed"),
+]
 
 # cc = customer care
 class Cc_person(models.Model):
@@ -29,6 +33,7 @@ class Driver(models.Model):
     user_driver = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="user_driver"
     )
+    case_status = models.IntegerField(choices=STATUSES, default=0)
 
     class Meta:
         db_table = "Driver"
@@ -99,10 +104,6 @@ class Case(models.Model):
         ("MIN", "Minor"),
     ]
 
-    STATUSES = [
-        (0, "Open"),
-        (1, "Closed"),
-    ]
 
     case_id = models.BigAutoField(primary_key=True, auto_created=True)
     Patient_name = models.CharField(max_length=35)
