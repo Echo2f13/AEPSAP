@@ -1,0 +1,109 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <title>Dashboard | Care</title>
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+
+    <!-- Favicons -->
+    <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+    <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link
+        href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+        rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/vendor/quill/quill.snow.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/vendor/quill/quill.bubble.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/vendor/remixicon/remixicon.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/vendor/simple-datatables/style.css' %}" rel="stylesheet">
+
+    <!-- Template Main CSS File -->
+    <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCfs2EPBwjylYC_6twmdwnIFXUlc5LkaH0"></script>
+
+
+    <!-- =======================================================
+  * Template Name: NiceAdmin
+  * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
+  * Updated: Apr 20 2024 with Bootstrap v5.3.3
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body>
+
+    <main>
+        <div class="container">
+
+            <section class="section profile">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="d-flex justify-content-center py-4">
+                            <span class="card-title pb-0 fs-4 d-lg-block"><b>Case ID : {{ case.case_id }}</b></span>
+                        </div><!-- End Logo -->
+
+
+                        <div class="card">
+                            <div class="card-body">
+                                <br>
+                                <br>
+                                <div class="map">
+                                    <iframe
+                                        src="https://maps.google.com/maps?q=12.9716,77.5946&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                                        frameborder="0" style="  width: 100%; height: 400px;" allowfullscreen></iframe>
+                                </div>
+                                <h3>Case Details</h3>
+                                <p>Patient Name: {{ case.Patient_name }}</p>
+                                <p>Point of Contact: {{ case.poc }}</p>
+                                <p>Accident Type: {{ case.get_accident_type_display }}</p>
+                                <p>Patient Severity: {{ case.get_patient_severity_display }}</p>
+                                <p>Location: {{ case.location }}</p>
+                                <p>Time and Date: {{ case.time_date }}</p>
+                                <p>Status: {{ case.get_status_display }}</p>
+                                <p>Ambulance: {{ case.ambulance.ambulance_number }}</p>
+                                <p>Assigned CC Person: {{ case.assigned_cc_person.user_cc.username }}</p>
+                            </div>
+                        </div>
+
+                        <div class="credits">
+                        </div>
+                    </div>
+
+            </section>
+
+        </div>
+    </main><!-- End #main -->
+
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+            class="bi bi-arrow-up-short"></i></a>
+
+    <!-- Vendor JS Files -->
+    <script src="{% static 'assets/vendor/apexcharts/apexcharts.min.js' %}"></script>
+    <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/vendor/chart.js/chart.umd.js' %}"></script>
+    <script src="{% static 'assets/vendor/echarts/echarts.min.js' %}"></script>
+    <script src="{% static 'assets/vendor/quill/quill.js' %}"></script>
+    <script src="{% static 'assets/vendor/simple-datatables/simple-datatables.js' %}"></script>
+    <script src="{% static 'assets/vendor/tinymce/tinymce.min.js' %}"></script>
+    <script src="{% static 'assets/vendor/php-email-form/validate.js' %}"></script>
+
+    <!-- Template Main JS File -->
+    <script src="{% static 'assets/js/main.js' %}"></script>
+
+</body>
+
+</html>

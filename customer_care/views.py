@@ -17,7 +17,7 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
 
 from sas import settings
-from case_details.models import Cc_person, Hospital, Ambulance, Driver, Case
+from case_details.models import Cc_person, Hospital, Driver, Driver, Case
 from django.urls import reverse
 from case_details.models import User
 from django.core.mail import send_mail
@@ -230,7 +230,7 @@ def care_case(request, pk):
         {
             "user": User.objects.filter(id=request.user.id),
             "care": Cc_person.objects.filter(user_cc=request.user.id),
-            "amb": Ambulance.objects.all(),
+            "amb": Driver.objects.all(),
             "hos": Hospital.objects.all(),
             "dri": Driver.objects.all(),
             "accident_types": Case.ACCIDENT_TYPES,
@@ -239,21 +239,26 @@ def care_case(request, pk):
         },
     )
 
-def add_case(request):
-    if request.method == 'POST':
-        patient_name = request.POST['patient_name']
-        poc = request.POST['poc']
-        accident_type = request.POST['accident_type']
-        patient_severity = request.POST['patient_severity']
-        location = request.POST['location']
-        status = request.POST['status']
-        ambulance_id = request.POST['ambulance']
-        assigned_cc_person_id = request.POST['assigned_cc_person']
-        description = request.POST.get('description', '')
-        first_responder_notes = request.POST.get('first_responder_notes', '')
 
-        ambulance = Ambulance.objects.get(id=ambulance_id) if ambulance_id else None
-        assigned_cc_person = Cc_person.objects.get(cc_id=assigned_cc_person_id) if assigned_cc_person_id else None
+def add_case(request):
+    if request.method == "POST":
+        patient_name = request.POST["patient_name"]
+        poc = request.POST["poc"]
+        accident_type = request.POST["accident_type"]
+        patient_severity = request.POST["patient_severity"]
+        location = request.POST["location"]
+        status = request.POST["status"]
+        ambulance_id = request.POST["ambulance"]
+        assigned_cc_person_id = request.POST["assigned_cc_person"]
+        description = request.POST.get("description", "")
+        first_responder_notes = request.POST.get("first_responder_notes", "")
+
+        ambulance = Driver.objects.get(id=ambulance_id) if ambulance_id else None
+        assigned_cc_person = (
+            Cc_person.objects.get(cc_id=assigned_cc_person_id)
+            if assigned_cc_person_id
+            else None
+        )
         current_time_date = datetime.now()
         new_case = Case(
             Patient_name=patient_name,
@@ -277,20 +282,19 @@ def add_case(request):
         )  # Redirect to a success page or the list of cases
     else:
         return render(
-        request,
-        "customer_care/care_case.html",
-        {
-            "user": User.objects.filter(id=request.user.id),
-            "care": Cc_person.objects.filter(user_cc=request.user.id),
-            "amb": Ambulance.objects.all(),
-            "hos": Hospital.objects.all(),
-            "dri": Driver.objects.all(),
-            "accident_types": Case.ACCIDENT_TYPES,
-            "severity_levels": Case.SEVERITY_LEVELS,
-            "case": Case.objects.all(),
-        },
-    )
-
+            request,
+            "customer_care/care_case.html",
+            {
+                "user": User.objects.filter(id=request.user.id),
+                "care": Cc_person.objects.filter(user_cc=request.user.id),
+                "amb": Driver.objects.all(),
+                "hos": Hospital.objects.all(),
+                "dri": Driver.objects.all(),
+                "accident_types": Case.ACCIDENT_TYPES,
+                "severity_levels": Case.SEVERITY_LEVELS,
+                "case": Case.objects.all(),
+            },
+        )
 
 
 def care_ambulance(request, pk):
@@ -300,7 +304,7 @@ def care_ambulance(request, pk):
         {
             "user": User.objects.filter(id=pk),
             "care": Cc_person.objects.filter(user_cc=pk),
-            "amb": Ambulance.objects.all(),
+            "amb": Driver.objects.all(),
             "hos": Hospital.objects.all(),
             "dri": Driver.objects.all(),
         },
@@ -327,7 +331,7 @@ def add_ambulance(request):
         hospital_id = Hospital.objects.filter(name=hospital).first()
         driver_1_id = Driver.objects.filter(user_driver=user_1_id).first()
         driver_2_id = Driver.objects.filter(user_driver=user_2_id).first()
-        new_ambulance = Ambulance(
+        new_ambulance = Driver(
             ambulance_number=ambulance_number,
             ambulance_size=ambulance_size,
             ambulance_model=ambulance_model,
@@ -354,7 +358,7 @@ def add_ambulance(request):
         {
             "user": User.objects.filter(id=request.user.id).first(),
             "care": Cc_person.objects.filter(user_cc=request.user.id).first(),
-            "amb": Ambulance.objects.all(),
+            "amb": Driver.objects.all(),
             "hos": Hospital.objects.all(),
             "dri": Driver.objects.all(),
         },

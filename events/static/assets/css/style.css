@@ -1248,3 +1248,16 @@ h6 {
   z-index: -1;
   /* Ensure it stays in the background */
 }
+
+/* Custom switch styling */
+.form-check-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.form-check-input {
+  width: 2.5em;
+  height: 1.5em;
+  margin-left: -1.5em;
+  cursor: pointer;
+}

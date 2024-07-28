@@ -17,7 +17,7 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
 
 from sas import settings
-from case_details.models import Driver
+from case_details.models import Driver, Driver, Case, Cc_person, Hospital, Ambulance
 from case_details.models import User
 from django.core.mail import send_mail
 from sas.settings import EMAIL_HOST_USER
@@ -166,7 +166,7 @@ def login(request):
                         print("003")
                         auth_login(request, user)
                         print("logged in after 003")
-                        return redirect("driver_profile", pk=driver_data.id)
+                        return redirect("driver_dashboard", pk=user.id)
                         # return render(
                         #     request,
                         #     "driver/user_profile.html",
@@ -213,8 +213,47 @@ def login(request):
     return render(request, "driver\login.html")
 
 
+def dashboard(request, pk):
+    return render(
+        request,
+        "driver/dashboard.html",
+        {
+            "user": User.objects.filter(id=pk),
+            "dri": Driver.objects.filter(user_driver=pk),
+        },
+    )
+
+
+def case(request, pk):
+    return render(
+        request,
+        "driver/driver_case.html",
+        {
+            "user": User.objects.filter(id=pk),
+            "dri": Driver.objects.filter(user_driver=pk),
+            "care": Cc_person.objects.all(),
+            "case": Case.objects.all(),
+            "hos": Hospital.objects.all(),
+            "amb": Driver.objects.all(),
+        },
+    )
+
+
+def h_and_a(request, pk):
+    driver = Driver.objects.filter(user_driver=pk).first()
+    return render(
+        request,
+        "driver/driver_h_and_a.html",
+        {
+            "user": User.objects.filter(id=pk),
+            "dri": Driver.objects.filter(user_driver=pk),
+            "amb": Ambulance.objects.filter(driver_1=driver.id).first(),
+            "hos": Hospital.objects.all(),
+        },
+    )
+
+
 def profile(request, pk):
-    # cou = CourseData.objects.all().values()
     return render(
         request,
         "driver/driver_profile.html",
@@ -225,8 +264,110 @@ def profile(request, pk):
     )
 
 
+def edit_profile(request):
+    if request.method == "POST":
+        user_id = request.POST["user_id"]
+        user = User.objects.filter(id=user_id).first()
+        pk = user_id
+        driver = Driver.objects.filter(user_driver=user_id).first()
+        if "dri_image" in request.FILES:
+            driver.driver_photo = request.FILES.get("dri_image")
+
+        if "firstName" in request.POST:
+            user.first_name = request.POST["firstName"]
+        if "lastName" in request.POST:
+            user.last_name = request.POST["lastName"]
+        if "phone" in request.POST:
+            user.username = request.POST["phone"]
+
+        # Save the updates
+        user.save()
+        driver.save()
+
+        messages.success(request, "Profile updated successfully.")
+        return redirect(
+            "driver_profile", pk=pk
+        )  # Redirect to the same page after update
+
+    return redirect("driver_profile", pk=pk)
+
+
+def remove_profile_image_driver(request):
+    driver = Driver.objects.filter(user_driver=request.user.id).first()
+    if driver and driver.driver_photo:
+        driver.driver_photo.delete()  # Deletes the file
+        driver.driver_photo = None
+        driver.save()
+        messages.success(request, "Profile image removed successfully.")
+    else:
+        messages.error(request, "No profile image to remove.")
+    return redirect("driver_profile", pk=request.user.id)
+
+
+def driver_change_pass(request):
+    if request.method == "POST":
+        user_id = request.POST["user_id"]
+        user = User.objects.filter(id=user_id).first()
+        pk = user_id
+        if "submit" in request.POST:
+            password = request.POST["password"]
+            check_current_password = check_password(password, user.password)
+            if check_current_password:
+                newpassword = request.POST["newpassword"]
+                renewpassword = request.POST["renewpassword"]
+                if newpassword == renewpassword:
+                    user.set_password(newpassword)
+                    user.save()
+                    messages.success(request, "Password successfully changed")
+                else:
+                    messages.error(request, "New passwords don't match")
+            else:
+                messages.error(request, "Old password you entered is wrong")
+        return redirect("driver_profile", pk=pk)
+    else:
+        return redirect("driver_profile", pk=pk)
+
+
 def logout(request):
     print("logout1")
     auth_logout(request)
     print("logout2")
     return render(request, "driver\login.html")
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
+
+
+@login_required
+@ensure_csrf_cookie
+@csrf_exempt
+def toggle_tracking(request):
+    if request.method == "POST":
+        driver = Driver.objects.get(user_driver=request.user.id)
+        is_tracking = request.POST.get("is_tracking") == "on"
+        driver.is_tracking = is_tracking
+        driver.save()
+        return redirect("driver_case", pk=request.user.id)
+    return JsonResponse({"status": "failed"})
+
+import json
+@csrf_exempt
+def update_location(request):
+    if request.method == "POST":
+        driver = Driver.objects.get(user_driver=request.user.id)
+        data = json.loads(request.body)
+        driver.current_location = data.get("location")
+        driver.save()
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "failed"})
+
+def get_driver_location(request):
+    case = Case.objects.filter(ambulance__id=pk).first()
+    driver = Driver.objects.get(user_driver=request.user.id)
+    return JsonResponse({
+        'latitude': driver.current_location.latitude,
+        'longitude': driver.current_location.longitude,
+    })

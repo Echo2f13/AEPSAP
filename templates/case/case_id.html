@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    <title>Home</title>
+    <title>ID | Care</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
 
@@ -45,53 +45,45 @@
 
     <main>
         <div class="container">
+
             <section
                 class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
                 <div class="container">
-                    <div class="background-image"></div>
                     <div class="row justify-content-center">
                         <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
 
                             <div class="d-flex justify-content-center py-4">
-                                <span class="card-title pb-0 fs-4 d-lg-block"><b>Smart Ambulance System</b></span>
+                                <span class="card-title pb-0 fs-4 d-lg-block"><b>SAS Case ID</b></span>
                             </div><!-- End Logo -->
 
                             <div class="card mb-3">
 
                                 <div class="card-body">
-                                    <div class="pt-4 pb-2">
-                                        <h5 class="card-title text-center pb-0 fs-4">Welcome to Our Service</h5>
-                                    </div>
-                                    <br>
-                                    <center>
-                                        <p>Select the appropriate option to proceed to the respective page.</p>
-                                    </center>
-                                    <div class="d-flex flex-column">
-                                        <div class="container">
-                                            <div class="row justify-content-center mb-2">
-                                                <div class="col-auto">
-                                                    <a href="{% url 'care_login' %}"
-                                                        class="btn btn-outline-primary btn-lg">Care</a>
-                                                </div>
-                                                <div class="col-auto">
-                                                    <a href="{% url 'driver_login' %}"
-                                                        class="btn btn-outline-secondary btn-lg">Driver</a>
-                                                </div>
-                                            </div>
 
-                                            <div class="row justify-content-center mt-3">
-                                                <div class="col-auto">
-                                                    <a href="{% url 'case_id' %}"
-                                                        class="btn btn-outline-danger btn-lg">Case</a>
-                                                </div>
+                                    <div class="pt-4 pb-2">
+                                        <h5 class="card-title text-center pb-0 fs-4">Enter your case id here</h5>
+                                    </div>
+                                    <br><br>
+
+                                    <form action="#" method="post" enctype="multipart/form-data"
+                                        class="row g-3 needs-validation" novalidate>
+                                        {% csrf_token %}
+                                        <div class="col-12">
+                                            <label for="yourUsername" class="form-label">ID</label>
+                                            <div class="input-group has-validation">
+                                                <!-- <span class="input-group-text" id="inputGroupPrepend">@</span> -->
+                                                <input type="text" name="case_unique_id" class="form-control" id="yourUsername"
+                                                    required>
+                                                <div class="invalid-feedback">Please enter your Case ID.</div>
                                             </div>
                                         </div>
 
 
+                                        <div class="col-12">
+                                            <button class="btn btn-primary w-100" type="submit">Open</button>
+                                        </div>
+                                    </form>
 
-
-                                    </div>
-                                    <br>
                                 </div>
                             </div>
 
@@ -99,11 +91,11 @@
                             </div>
                         </div>
                     </div>
-                </div>
+
             </section>
+
         </div>
     </main><!-- End #main -->
-
 
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
             class="bi bi-arrow-up-short"></i></a>

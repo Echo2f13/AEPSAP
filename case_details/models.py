@@ -27,13 +27,12 @@ class Driver(models.Model):
     license_number = models.CharField(max_length=50, unique=True, null=False)
     # phone_number = models.CharField(max_length=15, unique=True, null=False)
     driver_photo = models.ImageField(null=True, upload_to="driver_photos/")
-    hospital_related_to = models.ForeignKey(
-        "Hospital", on_delete=models.CASCADE, null=True
-    )
     user_driver = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="user_driver"
     )
     case_status = models.IntegerField(choices=STATUSES, default=0)
+    current_location = models.CharField(max_length=255, null=True, blank=True)
+    is_tracking = models.BooleanField(default=False)
 
     class Meta:
         db_table = "Driver"
