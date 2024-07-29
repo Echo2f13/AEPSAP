@@ -56,15 +56,17 @@ def case_id(request):
     )
 
 
-
-
 def case_page(request, pk):
     case_data = Case.objects.filter(case_id=pk).first()
     location = case_data.location
+    amb_location = case_data.ambulance.driver_1.current_location
     if location:
-        location_split = location.split(',')
+        location_split = location.split(",")
         location_lat = location_split[0]
         location_lng = location_split[1]
+        amb_location_split = amb_location.split(",")
+        amb_location_lat = amb_location_split[0]
+        amb_location_lng = amb_location_split[1]
     else:
         location_lat = location_lng = None
     return render(
@@ -73,17 +75,22 @@ def case_page(request, pk):
         {
             "case": Case.objects.filter(case_id=pk).first(),
             "google_maps_api_key": "AIzaSyCfs2EPBwjylYC_6twmdwnIFXUlc5LkaH0",
-            "location_lat" : location_lat,
-            "location_lng" : location_lng,
-
+            "location_lat": location_lat,
+            "location_lng": location_lng,
+            "amb_location_lat": amb_location_lat,
+            "amb_location_lng": amb_location_lng,
         },
     )
 
+
 from django.http import JsonResponse
+
 
 def update_ambulance_location(request, pk):
     case = Case.objects.filter(ambulance__id=pk).first()
-    location = case.ambulance.driver.current_location if case and case.ambulance.driver.is_tracking else "0,0"
-    return JsonResponse({'location': location})
-
-
+    location = (
+        case.ambulance.driver.current_location
+        if case and case.ambulance.driver.is_tracking
+        else "0,0"
+    )
+    return JsonResponse({"location": location})
