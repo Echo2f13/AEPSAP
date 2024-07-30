@@ -203,11 +203,55 @@
                                     <form id="toggleTrackingForm" method="POST" action="{% url 'toggle_tracking' %}">
                                         {% csrf_token %}
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" name="is_tracking" id="toggleTrackingSwitch" {% if driver.is_tracking %} checked {% endif %}>
-                                            <label class="form-check-label" for="toggleTrackingSwitch">{{ driver.is_tracking|yesno:"Turn Off Tracking,Turn On Tracking" }}</label>
+                                            <input class="form-check-input" type="checkbox" name="is_tracking" id="toggleTrackingSwitch" 
+                                                {% if dir == 1 %} 
+                                                checked 
+                                                {% endif %}
+                                            >
+                                            <label class="form-check-label" for="toggleTrackingSwitch">{{ dri.is_tracking|yesno:"Turn Off Tracking,Turn On Tracking" }}</label>
                                         </div>
+                                        <br>
+                                            <label class="form-check-label" for="status">{{ driver.case_status }}</label>
+                                            <input class="form-check-input" type="radio" id="casestatus" name="casestatus" value="1" > Closed
+                                        
                                         <button type="submit" class="btn btn-primary mt-2">Update</button>
                                     </form>
+                                    {% if driver.case_status == 0 %}
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">#</th>
+                                                <th scope="col">Case ID</th>
+                                                <th scope="col">Patient Name</th>
+                                                <th scope="col">Point of Contact</th>
+                                                <th scope="col">Accident Type</th>
+                                                <th scope="col">Severity Level</th>
+                                                <th scope="col">Location</th>
+                                                <th scope="col">Date and Time</th>
+                                                <th scope="col">Customer Care</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for case in case %}
+                                            {% for driver in dri %}
+                                            {% if case.status == 0 and case.ambulance.driver_1.user_driver.id == driver.user_driver.id %}
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ case.case_id }}</td>
+                                            <td>{{ case.Patient_name }}</td>
+                                            <td>{{ case.poc }}</td>
+                                            <td>{{ case.get_accident_type_display }}</td>
+                                            <td>{{ case.get_patient_severity_display }}</td>
+                                            <td>{{ case.location }}</td>
+                                            <td>{{ case.time_date }}</td>
+                                            <td>{{ case.assigned_cc_person.user_cc.username }}</td>
+                                            </tr>
+
+                                            {% endif %}
+                                            {% endfor %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    {% endif %}
                                     <br>
                                     <br>
                                     <div id="map" style="width: 100%; height: 400px;"></div>

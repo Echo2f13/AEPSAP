@@ -349,11 +349,15 @@ def toggle_tracking(request):
         driver = Driver.objects.get(user_driver=request.user.id)
         is_tracking = request.POST.get("is_tracking") == "on"
         driver.is_tracking = is_tracking
+        driver.case_status = request.POST["casestatus"]
         driver.save()
         return redirect("driver_case", pk=request.user.id)
     return JsonResponse({"status": "failed"})
 
+
 import json
+
+
 @csrf_exempt
 def update_location(request):
     if request.method == "POST":
@@ -364,10 +368,13 @@ def update_location(request):
         return JsonResponse({"status": "success"})
     return JsonResponse({"status": "failed"})
 
+
 def get_driver_location(request):
     case = Case.objects.filter(ambulance__id=pk).first()
     driver = Driver.objects.get(user_driver=request.user.id)
-    return JsonResponse({
-        'latitude': driver.current_location.latitude,
-        'longitude': driver.current_location.longitude,
-    })
+    return JsonResponse(
+        {
+            "latitude": driver.current_location.latitude,
+            "longitude": driver.current_location.longitude,
+        }
+    )

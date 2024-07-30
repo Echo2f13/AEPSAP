@@ -17,7 +17,7 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
 
 from sas import settings
-from case_details.models import Cc_person, Hospital, Driver, Driver, Case
+from case_details.models import Cc_person, Hospital, Driver, Driver, Case, Ambulance
 from django.urls import reverse
 from case_details.models import User
 from django.core.mail import send_mail
@@ -273,7 +273,10 @@ def add_case(request):
             description=description,
             first_responder_notes=first_responder_notes,
         )
-
+        ambulance = Ambulance.objects.filter(ambulance_id=ambulance)
+        driver = Driver.objects.filter(id=ambulance.driver_1_id)
+        driver.case_status = 0
+        driver.save()
         new_case.save()
 
         return redirect(
