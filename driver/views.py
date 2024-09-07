@@ -6,11 +6,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 import socket
 from django.contrib.sites.shortcuts import get_current_site
+from jwt.exceptions import InvalidTokenError
 
 # from .models import User
 import jwt
 from rest_framework import views
-from rest_framework_simplejwt.tokens import RefreshToken
+
+# from rest_framework_simplejwt.tokens import RefreshToken
 
 from django.contrib import messages
 
@@ -46,25 +48,25 @@ import xlsxwriter
 is_active_verify = False
 
 
+from rest_framework_simplejwt.tokens import RefreshToken
+from datetime import timedelta
+
+
 def signup(request):
     try:
         if request.user.is_authenticated:
-            return render(request, "driver\login.html")
+            return render(request, "driver/login.html")
         else:
             if request.method == "POST":
                 first_name = request.POST["first_name"]
                 last_name = request.POST["last_name"]
                 email = request.POST["email"]
-                # phone number is username
                 phone = request.POST["phone"]
                 license_number = request.POST["license_number"]
-                # license_number = request.POST["licence"]
                 password = request.POST["password"]
-                # image = request.FILES['image']
-                # print('image=', image)
-                message1 = 0  # this will be popped when repeated email is used
-                # this will be popped when user created and asked to verify email (student_login page)
+                message1 = 0
                 message2 = 0
+
                 exists = User.objects.filter(email=email)
                 print("user data=", exists)
                 if not exists:
@@ -72,56 +74,53 @@ def signup(request):
                         username=phone,
                         email=email,
                         password=password,
-                        is_active=is_active_verify,
+                        is_active=False,  # account is inactive until verified
                         first_name=first_name,
                         last_name=last_name,
                     )
                     user.save()
+
                     driver_data = Driver.objects.create(
                         user_driver=user, license_number=license_number
                     )
                     driver_data.save()
                     print("data received")
-                    d_id_data = Driver.objects.filter(
-                        license_number=license_number
-                    ).first()
-                    d_id = d_id_data.id
-                    print(d_id)
+
                     user_email = User.objects.get(email=email)
                     print(user_email)
-                    refresh = RefreshToken.for_user(user_email).access_token
-                    print(refresh)
+
+                    # Generate refresh token for the user
+                    refresh = RefreshToken.for_user(user_email)
                     refresh.set_exp(lifetime=timedelta(days=36500))
+
                     current_site = get_current_site(request).domain
                     relativeLink = reverse("email_verify")
                     print(relativeLink)
-                    Email = email
+
                     absUrl = (
                         "http://"
                         + current_site
                         + relativeLink
                         + "?token="
-                        + str(refresh)
+                        + str(refresh.access_token)  # Make sure to use access token
                     )
-                    Subject = " Hello " + "Verification pending"
-                    Message = "Click below link to activate your account \n " + absUrl
-                    send_mail(Subject, Message, EMAIL_HOST_USER, [Email])
+                    Subject = "Hello " + "Verification pending"
+                    Message = "Click the link to activate your account: \n" + absUrl
+                    send_mail(Subject, Message, EMAIL_HOST_USER, [email])
+
                     print("pass1")
                     print(absUrl)
                     message2 = 1
-                    return render(request, "driver\login.html", {"message2": message2})
+                    return render(request, "driver/login.html", {"message2": message2})
                 else:
                     message1 = 1
                     return render(request, "driver/signup.html", {"message1": message1})
     except IntegrityError:
         print("pass2")
-        return render(
-            request,
-            "driver/signup.html",
-        )
+        return render(request, "driver/signup.html")
+
     print("pass3")
     return render(request, "driver/signup.html")
-    # return render(request, "driver/signup.html")
 
 
 class VerifyEmail(views.APIView):

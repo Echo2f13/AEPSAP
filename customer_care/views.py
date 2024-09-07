@@ -116,16 +116,16 @@ def signup(request):
                 else:
                     message1 = 1
                     return render(
-                        request, "customer_care/signup.html", {"message1": message1}
+                        request, "customer_care\signup.html", {"message1": message1}
                     )
     except IntegrityError:
         print("pass2")
         return render(
             request,
-            "customer_care/signup.html",
+            "customer_care\signup.html",
         )
     print("pass3")
-    return render(request, "customer_care/signup.html")
+    return render(request, "customer_care\signup.html")
     # return render(request, "driver/signup.html")
 
 
@@ -230,7 +230,7 @@ def care_case(request, pk):
         {
             "user": User.objects.filter(id=request.user.id),
             "care": Cc_person.objects.filter(user_cc=request.user.id),
-            "amb": Driver.objects.all(),
+            "amb": Ambulance.objects.all(),
             "hos": Hospital.objects.all(),
             "dri": Driver.objects.all(),
             "accident_types": Case.ACCIDENT_TYPES,
@@ -253,7 +253,9 @@ def add_case(request):
         description = request.POST.get("description", "")
         first_responder_notes = request.POST.get("first_responder_notes", "")
 
-        ambulance = Driver.objects.get(id=ambulance_id) if ambulance_id else None
+        ambulance = (
+            Driver.objects.filter(ambulance_id=ambulance_id) if ambulance_id else None
+        )
         assigned_cc_person = (
             Cc_person.objects.get(cc_id=assigned_cc_person_id)
             if assigned_cc_person_id
@@ -273,8 +275,10 @@ def add_case(request):
             description=description,
             first_responder_notes=first_responder_notes,
         )
-        ambulance = Ambulance.objects.filter(ambulance_id=ambulance)
-        driver = Driver.objects.filter(id=ambulance.driver_1_id)
+        print(ambulance)
+        ambulance_catch = Ambulance.objects.filter(ambulance_id=ambulance_id)
+
+        driver = Driver.objects.filter(id=ambulance_catch.driver_1.id).first()
         driver.case_status = 0
         driver.save()
         new_case.save()
@@ -290,7 +294,7 @@ def add_case(request):
             {
                 "user": User.objects.filter(id=request.user.id),
                 "care": Cc_person.objects.filter(user_cc=request.user.id),
-                "amb": Driver.objects.all(),
+                "amb": Ambulance.objects.all(),
                 "hos": Hospital.objects.all(),
                 "dri": Driver.objects.all(),
                 "accident_types": Case.ACCIDENT_TYPES,
@@ -307,7 +311,7 @@ def care_ambulance(request, pk):
         {
             "user": User.objects.filter(id=pk),
             "care": Cc_person.objects.filter(user_cc=pk),
-            "amb": Driver.objects.all(),
+            "amb": Ambulance.objects.all(),
             "hos": Hospital.objects.all(),
             "dri": Driver.objects.all(),
         },
@@ -334,7 +338,7 @@ def add_ambulance(request):
         hospital_id = Hospital.objects.filter(name=hospital).first()
         driver_1_id = Driver.objects.filter(user_driver=user_1_id).first()
         driver_2_id = Driver.objects.filter(user_driver=user_2_id).first()
-        new_ambulance = Driver(
+        new_ambulance = Ambulance(
             ambulance_number=ambulance_number,
             ambulance_size=ambulance_size,
             ambulance_model=ambulance_model,
@@ -361,7 +365,7 @@ def add_ambulance(request):
         {
             "user": User.objects.filter(id=request.user.id).first(),
             "care": Cc_person.objects.filter(user_cc=request.user.id).first(),
-            "amb": Driver.objects.all(),
+            "amb": Ambulance.objects.all(),
             "hos": Hospital.objects.all(),
             "dri": Driver.objects.all(),
         },

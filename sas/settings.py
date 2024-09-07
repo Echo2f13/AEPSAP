@@ -138,3 +138,12 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_HOST_USER = "manishdevrock@gmail.com"
 EMAIL_HOST_PASSWORD = "rbxehrlpzpywomnw"
+
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=36500),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=36500),
+    # other settings
+}
