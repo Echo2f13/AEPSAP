@@ -306,11 +306,14 @@
                                                 <select name="ambulance" class="form-control" id="ambulance">
                                                     <option value="" disabled selected>Select an ambulance</option>
                                                     {% for ambulance in amb %}
+                                                    {% if ambulance.driver_1.case_status == 0 %}
                                                     <option value="{{ ambulance.ambulance_id }}">{{ ambulance }}</option>
+                                                    {% endif %}
                                                     {% endfor %}
                                                 </select>
                                             </div>
                                         </div>
+
 
                                         <div class="row mb-3" hidden>
                                             <label for="assigned_cc_person"

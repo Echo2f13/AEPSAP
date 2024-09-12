@@ -254,7 +254,7 @@ def add_case(request):
         first_responder_notes = request.POST.get("first_responder_notes", "")
 
         ambulance = (
-            Driver.objects.filter(ambulance_id=ambulance_id) if ambulance_id else None
+            Ambulance.objects.filter(ambulance_id=ambulance_id).first() if ambulance_id else None
         )
         assigned_cc_person = (
             Cc_person.objects.get(cc_id=assigned_cc_person_id)
@@ -270,15 +270,15 @@ def add_case(request):
             location=location,
             time_date=current_time_date,
             status=status,
-            ambulance=ambulance,
+            ambulance_id=ambulance.ambulance_id,
             assigned_cc_person=assigned_cc_person,
             description=description,
             first_responder_notes=first_responder_notes,
         )
         print(ambulance)
-        ambulance_catch = Ambulance.objects.filter(ambulance_id=ambulance_id)
+        # ambulance_catch = Ambulance.objects.filter(ambulance_id=ambulance_id)
 
-        driver = Driver.objects.filter(id=ambulance_catch.driver_1.id).first()
+        driver = Driver.objects.filter(id=ambulance.driver_1.id).first()
         driver.case_status = 0
         driver.save()
         new_case.save()

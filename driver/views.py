@@ -224,19 +224,52 @@ def dashboard(request, pk):
 
 
 def case(request, pk):
-    return render(
-        request,
-        "driver/driver_case.html",
-        {
+    try:
+        # Get the driver associated with the user
+        driver = Driver.objects.get(user_driver=pk)
+
+        # Find the first case where the driver is the primary driver
+        case_data = Case.objects.filter(ambulance__driver_1=driver).first()
+
+        if case_data:
+            # Extract the location and ambulance's current location
+            location = case_data.location
+            amb_location = case_data.ambulance.driver_1.current_location
+            
+            # Handle the splitting of the location if it exists
+            if location:
+                location_lat, location_lng = map(str.strip, location.split(","))
+            else:
+                location_lat = location_lng = None
+
+            if amb_location:
+                amb_location_lat, amb_location_lng = map(str.strip, amb_location.split(","))
+            else:
+                amb_location_lat = amb_location_lng = None
+        else:
+            location_lat = location_lng = amb_location_lat = amb_location_lng = None
+
+        # Prepare context for the template
+        context = {
             "user": User.objects.filter(id=pk),
             "dri": Driver.objects.filter(user_driver=pk),
             "care": Cc_person.objects.all(),
             "case": Case.objects.all(),
             "hos": Hospital.objects.all(),
-            "amb": Driver.objects.all(),
-        },
-    )
+            "case_in": case_data,
+            "google_maps_api_key": "AIzaSyCfs2EPBwjylYC_6twmdwnIFXUlc5LkaH0",
+            "location_lat": location_lat,
+            "location_lng": location_lng,
+            "amb_location_lat": amb_location_lat,
+            "amb_location_lng": amb_location_lng,
+        }
+    except Driver.DoesNotExist:
+        # Handle the case where the driver is not found
+        context = {
+            "error": "Driver not found",
+        }
 
+    return render(request, "driver/driver_case.html", context)
 
 def h_and_a(request, pk):
     driver = Driver.objects.filter(user_driver=pk).first()
