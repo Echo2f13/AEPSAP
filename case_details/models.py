@@ -33,6 +33,7 @@ class Driver(models.Model):
     case_status = models.IntegerField(choices=STATUSES, default=0)
     current_location = models.CharField(max_length=255, null=True, blank=True)
     is_tracking = models.BooleanField(default=False)
+    amb_con = models.BooleanField(default=0);
 
     class Meta:
         db_table = "Driver"
@@ -56,6 +57,7 @@ class Ambulance(models.Model):
     driver_1 = models.ForeignKey(
         "Driver", related_name="primary_driver", on_delete=models.CASCADE
     )
+    driver_1_con = models.BooleanField(default=1);
     driver_2 = models.ForeignKey(
         "Driver", related_name="secondary_driver", on_delete=models.SET_NULL, null=True
     )

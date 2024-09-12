@@ -291,7 +291,9 @@
                                             <select name="driver_1" class="form-control" id="driver_1" required>
                                                 <option value="" disabled selected>Select a Driver</option>
                                                 {% for driver in dri %}
+                                                {% if driver.amb_con == 0 %}
                                                 <option>{{ driver }}</option>
+                                                {% endif %}
                                                 {% endfor %}
                                             </select>
                                         </div>

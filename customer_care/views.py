@@ -338,6 +338,7 @@ def add_ambulance(request):
         hospital_id = Hospital.objects.filter(name=hospital).first()
         driver_1_id = Driver.objects.filter(user_driver=user_1_id).first()
         driver_2_id = Driver.objects.filter(user_driver=user_2_id).first()
+        # con = 1;
         new_ambulance = Ambulance(
             ambulance_number=ambulance_number,
             ambulance_size=ambulance_size,
@@ -350,8 +351,11 @@ def add_ambulance(request):
             bystander_3=bystander_3,
             bystander_4=bystander_4,
             ambulance_photo=ambulance_photo,
+            # driver_1_con = True;
         )
         new_ambulance.save()
+        driver_1_id_con = Driver(amb_con = 1)
+        driver_1_id_con.save() 
 
         messages.success(request, "Ambulance added successfully.")
         return redirect(
