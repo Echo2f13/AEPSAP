@@ -7,12 +7,11 @@ from django.contrib.auth.models import User
 import socket
 from django.contrib.sites.shortcuts import get_current_site
 from jwt.exceptions import InvalidTokenError
+import json
 
-# from .models import User
 import jwt
 from rest_framework import views
 
-# from rest_framework_simplejwt.tokens import RefreshToken
 
 from django.contrib import messages
 
@@ -25,25 +24,9 @@ from django.core.mail import send_mail
 from sas.settings import EMAIL_HOST_USER
 from django.urls import reverse
 
-# Fileresponse, io and report_lab for PDF generation
-import io
-from django.http import HttpResponse, FileResponse
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import letter, A4, landscape
-from reportlab.platypus import Image
-import pandas as pd
-import smtplib
-
 
 from django.template import loader
 from django.shortcuts import redirect, render
-
-from datetime import datetime, timedelta
-
-# to create xl sheet
-import xlsxwriter
-
 
 is_active_verify = False
 
@@ -373,21 +356,52 @@ from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 
 
+# @login_required
+# @ensure_csrf_cookie
+# @csrf_exempt
+# def toggle_tracking(request):
+#     if request.method == "POST":
+#         driver = Driver.objects.get(user_driver=request.user.id)
+#         is_tracking = request.POST.get("is_tracking") == "on"
+#         driver.is_tracking = is_tracking
+#         driver.case_status = request.POST["case_status"]
+#         driver.save()
+#         return redirect("driver_case", pk=request.user.id)
+#     return JsonResponse({"status": "failed"})
+from django.shortcuts import render, redirect, get_object_or_404
+
 @login_required
 @ensure_csrf_cookie
 @csrf_exempt
 def toggle_tracking(request):
     if request.method == "POST":
-        driver = Driver.objects.get(user_driver=request.user.id)
-        is_tracking = request.POST.get("is_tracking") == "on"
-        driver.is_tracking = is_tracking
-        driver.case_status = request.POST["casestatus"]
-        driver.save()
-        return redirect("driver_case", pk=request.user.id)
-    return JsonResponse({"status": "failed"})
+        try:
+            driver = get_object_or_404(Driver, user_driver=request.user.id)
+            ambulance = Ambulance.objects.filter(driver_1 = driver).first()
+            case_id = Case.objects.filter(ambulance_id = ambulance.ambulance_id).first()
+            
+            is_tracking = request.POST.get("is_tracking") == "on"
+            driver.is_tracking = is_tracking
+            
+            case_status = request.POST.get("case_status", None)
+            if case_status is not None:
+                driver.case_status = int(case_status)
+                case_id.status = int(case_status)
+            else:
+                return JsonResponse({"status": "failed", "error": "Invalid case status"})
 
+            driver.save()
+            case_id.save()
 
-import json
+            return redirect("driver_case", pk=request.user.id)
+
+        except Driver.DoesNotExist:
+            return JsonResponse({"status": "failed", "error": "Driver not found"}, status=404)
+        except ValueError:
+            return JsonResponse({"status": "failed", "error": "Invalid data"}, status=400)
+    
+    return JsonResponse({"status": "failed", "error": "Invalid request method"}, status=405)
+
 
 
 @csrf_exempt

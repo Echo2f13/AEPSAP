@@ -7,7 +7,6 @@ from django.contrib.auth.models import User
 import socket
 from django.contrib.sites.shortcuts import get_current_site
 
-# from .models import User
 import jwt
 from rest_framework import views
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -17,30 +16,14 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
 
 from sas import settings
-from case_details.models import Driver, Driver, Case, Cc_person, Hospital
+from case_details.models import Driver, Case, Cc_person, Hospital
 from case_details.models import User
 from django.core.mail import send_mail
 from sas.settings import EMAIL_HOST_USER
 from django.urls import reverse
 
-# Fileresponse, io and report_lab for PDF generation
-import io
-from django.http import HttpResponse, FileResponse
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import letter, A4, landscape
-from reportlab.platypus import Image
-import pandas as pd
-import smtplib
 
-
-from django.template import loader
 from django.shortcuts import redirect, render
-
-from datetime import datetime, timedelta
-
-# to create xl sheet
-import xlsxwriter
 
 
 is_active_verify = False

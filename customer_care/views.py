@@ -24,24 +24,9 @@ from django.core.mail import send_mail
 from sas.settings import EMAIL_HOST_USER
 from django.urls import reverse
 
-# Fileresponse, io and report_lab for PDF generation
-import io
-from django.http import HttpResponse, FileResponse
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import letter, A4, landscape
-from reportlab.platypus import Image
-import pandas as pd
-import smtplib
-
-
 from django.template import loader
 from django.shortcuts import redirect, render
 
-from datetime import datetime, timedelta
-
-# to create xl sheet
-import xlsxwriter
 
 is_active_verify = False
 
@@ -286,7 +271,7 @@ def add_case(request):
         return redirect(
             "care_case",
             pk=request.user.id,
-        )  # Redirect to a success page or the list of cases
+        )  
     else:
         return render(
             request,
@@ -332,7 +317,6 @@ def add_ambulance(request):
         bystander_4 = request.POST["bystander_4"]
         ambulance_photo = request.FILES.get("ambulance_photo")
 
-        # Create and save a new ambulance instance
         user_1_id = User.objects.filter(username=driver_1).first()
         user_2_id = User.objects.filter(username=driver_2).first()
         hospital_id = Hospital.objects.filter(name=hospital).first()
@@ -361,11 +345,11 @@ def add_ambulance(request):
         return redirect(
             "care_ambulance",
             pk=request.user.id,
-        )  # Redirect to the list of ambulances or another appropriate page
+        )  
 
     return render(
         request,
-        "ambulance/add_ambulance.html",  # Path to your HTML template
+        "ambulance/add_ambulance.html",  
         {
             "user": User.objects.filter(id=request.user.id).first(),
             "care": Cc_person.objects.filter(user_cc=request.user.id).first(),

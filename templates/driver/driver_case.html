@@ -36,7 +36,7 @@
             // Initialize the map
             var map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 12,
-                center: { lat: {{ location_lat }}, lng: {{ location_lng }} }
+                center: { lat: {{ amb_location_lat }}, lng: {{ amb_location_lng }} }
             });
 
             var markers = [
@@ -95,7 +95,6 @@
                 <li class="nav-item dropdown pe-3">
 
                     <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-                        <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
                         <span class="d-none d-md-block dropdown-toggle ps-2">{{ user.first_name }}</span>
                     </a><!-- End Profile Iamge Icon -->
 
@@ -198,7 +197,7 @@
 
                             </ul>
                             <div class="tab-content pt-2">
-
+                                {% if driver.case_status == 1 %}
                                 
                                 <div class="tab-pane fade profile-overview pt-3" id="profile-overview">
                                     <form id="toggleTrackingForm" method="POST" action="{% url 'toggle_tracking' %}">
@@ -212,8 +211,13 @@
                                             <label class="form-check-label" for="toggleTrackingSwitch">{{ dri.is_tracking|yesno:"Turn Off Tracking,Turn On Tracking" }}</label>
                                         </div>
                                         <br>
-                                            <label class="form-check-label" for="status">{{ driver.case_status }}</label>
-                                            <input class="form-check-input" type="radio" id="casestatus" name="casestatus" value="1" > Closed
+                                        
+                                        <!-- Dropdown for Case Status -->
+                                        <label for="case_status">Case Status</label>
+                                        <select class="form-select" id="case_status" name="case_status">
+                                            <option value="0" {% if driver.case_status == 0 %}selected{% endif %}>Open</option>
+                                            <option value="1" {% if driver.case_status == 1 %}selected{% endif %}>Close the Case</option>
+                                        </select>
                                         
                                         <button type="submit" class="btn btn-primary mt-2">Update</button>
                                     </form>
@@ -268,8 +272,10 @@
                                     <br>
                                     <br>
                                     <div id="map" style="width: 100%; height: 400px;"></div>
-      
-
+                                {% elif driver.case_status == 0 %}
+                                    <h1>waiting for new case</h1>
+                                {% endif %}
+                                
                                 </div>
                                 <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
 
