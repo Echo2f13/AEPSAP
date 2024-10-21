@@ -19,4 +19,6 @@ urlpatterns = [
     ),
     path("change_pass/", views.care_change_pass, name="care_change_pass"),
     path("logout/", views.logout, name="care_logout"),
+    
+
 ]

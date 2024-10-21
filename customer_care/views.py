@@ -467,3 +467,5 @@ def logout(request):
     auth_logout(request)
     print("logout2")
     return render(request, "customer_care\login.html")
+
+
