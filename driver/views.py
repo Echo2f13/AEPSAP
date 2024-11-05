@@ -214,7 +214,7 @@ def case(request, pk):
             "case": Case.objects.all(),
             "hos": Hospital.objects.all(),
             "case_in": case_data,
-            "google_maps_api_key": "AIzaSyCfs2EPBwjylYC_6twmdwnIFXUlc5LkaH0",
+            "google_maps_api_key": "use you map API here",
             "location_lat": location_lat,
             "location_lng": location_lng,
             "amb_location_lat": amb_location_lat,
