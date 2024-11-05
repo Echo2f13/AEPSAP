@@ -173,6 +173,11 @@
                                         +</button>
                                 </li>
 
+
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit-2">Notifications</button>
+                                </li>
+
                             </ul>
                             <div class="tab-content pt-2">
 
@@ -222,8 +227,134 @@
                                 </div>
 
                                 <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
+                                    
+                                    
+                        
+                                    {% if emg_data %}
+                                        <div class="alert alert-info">Message ID: {{ emg_data.id }}</div>
+                                    {% endif %}
 
                                     <!-- Profile Edit Form -->
+                                    {% if emg_data_id %}
+                                    
+                                                <div class="alert alert-info">id : {{ message }}</div>
+                                                <form action="{% url 'add_case' %}" method="POST">
+                                                    {% csrf_token %}
+            
+                                                    <div class="row mb-3">
+                                                        <label for="patient_name" class="col-md-4 col-lg-3 col-form-label">Patient
+                                                            Name</label>
+                                                        <div class="col-md-8 col-lg-9">
+                                                            <input name="patient_name" type="text" class="form-control"
+                                                                id="patient_name" placeholder="Enter patient name" value="{{ emg_data_id.name }}">
+                                                        </div>
+                                                    </div>
+            
+                                                    <div class="row mb-3">
+                                                        <label for="poc" class="col-md-4 col-lg-3 col-form-label">Point of
+                                                            Contact</label>
+                                                        <div class="col-md-8 col-lg-9">
+                                                            <input name="poc" type="text" class="form-control" id="poc"
+                                                                placeholder="Enter point of contact" value="{{ emg_data_id.emg_contact_name }}" required>
+                                                        </div>
+                                                    </div>
+            
+                                                    <div class="row mb-3">
+                                                        <label for="accident_type" class="col-md-4 col-lg-3 col-form-label">Accident
+                                                            Type</label>
+                                                        <div class="col-md-8 col-lg-9">
+                                                            <select name="accident_type" class="form-control" id="accident_type"
+                                                                required>
+                                                                <option value="" disabled selected>Select a Accident Types</option>
+                                                                {% for key, value in accident_types %}
+                                                                <option value="{{ key }}">{{ value }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+            
+                                                    <div class="row mb-3">
+                                                        <label for="patient_severity"
+                                                            class="col-md-4 col-lg-3 col-form-label">Severity Level</label>
+                                                        <div class="col-md-8 col-lg-9">
+                                                            <select name="patient_severity" class="form-control"
+                                                                id="patient_severity" required>
+                                                                <option value="" disabled selected>Select a Severity Levels</option>
+                                                                {% for key, value in severity_levels %}
+                                                                <option value="{{ key }}">{{ value }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+            
+                                                    <div class="row mb-3">
+                                                        <label for="location"
+                                                            class="col-md-4 col-lg-3 col-form-label">Location</label>
+                                                        <div class="col-md-8 col-lg-9">
+                                                            <input name="location" type="text" class="form-control" id="location"
+                                                                placeholder="Enter location" value="{{ emg_data_id.location }}" required>
+                                                        </div>
+                                                    </div>
+                                                  
+                                                    <div class="row mb-3" hidden>
+                                                        <label for="status" class="col-md-4 col-lg-3 col-form-label">Status</label>
+                                                        <div class="col-md-8 col-lg-9">
+                                                            <input name="status" type="text" class="form-control" id="status"
+                                                                value="0" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <label for="ambulance"
+                                                            class="col-md-4 col-lg-3 col-form-label">Ambulance</label>
+                                                        <div class="col-md-8 col-lg-9">
+                                                            <select name="ambulance" class="form-control" id="ambulance">
+                                                                <option value="" disabled selected>Select an ambulance</option>
+                                                                {% for ambulance in amb %}
+                                                                {% if ambulance.driver_1.case_status == 0 %}
+                                                                <option value="{{ ambulance.ambulance_id }}">{{ ambulance }}</option>
+                                                                {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+            
+            
+                                                    <div class="row mb-3" hidden>
+                                                        <label for="assigned_cc_person"
+                                                            class="col-md-4 col-lg-3 col-form-label">Assigned Care Person</label>
+                                                        <div class="col-md-8 col-lg-9">
+                                                            {% for care in care %}
+                                                            <input name="assigned_cc_person" value="{{ care.cc_id }}" type="text"
+                                                                class="form-control" id="assigned_cc_person" required>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+            
+                                                    <div class="row mb-3">
+                                                        <label for="description"
+                                                            class="col-md-4 col-lg-3 col-form-label">Description</label>
+                                                        <div class="col-md-8 col-lg-9">
+                                                            <textarea name="description" class="form-control"
+                                                                id="description"></textarea>
+                                                        </div>
+                                                    </div>
+            
+                                                    <div class="row mb-3">
+                                                        <label for="first_responder_notes"
+                                                            class="col-md-4 col-lg-3 col-form-label">First Responder Notes</label>
+                                                        <div class="col-md-8 col-lg-9">
+                                                            <textarea name="first_responder_notes" class="form-control"
+                                                                id="first_responder_notes"></textarea>
+                                                        </div>
+                                                    </div>
+            
+                                                    <div class="text-center">
+                                                        <button type="submit" class="btn btn-primary">Add Case  </button>
+                                                    </div>
+                                                </form>
+                                                
+                                    {% else %}
+
                                     <form action="{% url 'add_case' %}" method="POST">
                                         {% csrf_token %}
 
@@ -335,11 +466,43 @@
                                         </div>
 
                                         <div class="text-center">
-                                            <button type="submit" class="btn btn-primary">Add Case</button>
+                                            <button type="submit" class="btn btn-primary">Add Case  </button>
                                         </div>
                                     </form>
+                                    {% endif %}
 
 
+                                </div>
+                                <div class="tab-pane fade profile-edit pt-3" id="profile-edit-2">
+                                    {% for person in emg_data %}
+                                        <div style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px;box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <p><strong>Name:</strong> {{ person.name }} [ Age : {{ person.age }} ][ Blood Grp : {{ person.blood_grp }} ] </p>
+                                                    <p><strong>Phone Number:</strong> {{ person.phone_number }}</p>
+                                                    <p><strong>Emergency Contact:</strong> {{ person.emg_contact_name }} [ {{ person.emg_contact_phno }} ] [ {{ person.emg_contact_relation }} ]</p>
+                                                    <p><strong>Location:</strong> {{ person.location }}</p>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <p><strong>Images:</strong></p>
+                                                    <div>
+                                                        {% for image_path in person.images %}
+                                                            <!-- Construct the full image URL -->
+                                                            <img src="http://192.168.143.39:3000{{ image_path }}" alt="Emergency Image" style="width: 150px; height: auto; margin-right: 10px;">
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-1">
+                                                        <br>
+                                                        <br>
+                                                        <a class="nav-link collapsed" href="{% url 'accept_api_emg' person.id %}"><button>Accept</button><span></span></a>
+                                                        <br> <br>
+                                                        <a class="nav-link collapsed" href="{% url 'decline_api_emg' person.id %}"><button>Decline</button><span></span></a>
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                    {% endfor %}
                                 </div>
                             </div><!-- End Bordered Tabs -->
 

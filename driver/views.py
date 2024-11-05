@@ -36,75 +36,49 @@ from datetime import timedelta
 
 
 def signup(request):
-    try:
-        if request.user.is_authenticated:
-            return render(request, "driver/login.html")
-        else:
-            if request.method == "POST":
-                first_name = request.POST["first_name"]
-                last_name = request.POST["last_name"]
-                email = request.POST["email"]
-                phone = request.POST["phone"]
-                license_number = request.POST["license_number"]
-                password = request.POST["password"]
-                message1 = 0
-                message2 = 0
+    if request.method == "POST":
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        license_number = request.POST.get("license_number")
+        password = request.POST.get("password")
 
-                exists = User.objects.filter(email=email)
-                print("user data=", exists)
-                if not exists:
-                    user = User.objects.create_user(
-                        username=phone,
-                        email=email,
-                        password=password,
-                        is_active=False,  # account is inactive until verified
-                        first_name=first_name,
-                        last_name=last_name,
-                    )
-                    user.save()
+        try:
+            # Check if user already exists by email
+            if not User.objects.filter(email=email).exists():
+                # Create user
+                user = User.objects.create_user(
+                    username=phone,
+                    email=email,
+                    password=password,
+                    is_active=False,  # Account is inactive until verified
+                    first_name=first_name,
+                    last_name=last_name,
+                )
+                user.save()
+                user.is_active = True
+                user.save()
 
-                    driver_data = Driver.objects.create(
-                        user_driver=user, license_number=license_number
-                    )
-                    driver_data.save()
-                    print("data received")
+                # Create driver data
+                driver_data = Driver.objects.create(
+                    user_driver=user, license_number=license_number
+                )
+                driver_data.save()
+                # Redirect to login page after signup
+                return redirect('driver_login')
+            else:
+                # User with email already exists
+                message1 = "A user with this email already exists."
+                return render(request, "driver/signup.html", {"message1": message1})
 
-                    user_email = User.objects.get(email=email)
-                    print(user_email)
+        except IntegrityError:
+            # Handle database errors (e.g., duplicate entries)
+            message1 = "There was an error processing your request. Please try again."
+            return render(request, "driver/signup.html", {"message1": message1})
 
-                    # Generate refresh token for the user
-                    refresh = RefreshToken.for_user(user_email)
-                    refresh.set_exp(lifetime=timedelta(days=36500))
-
-                    current_site = get_current_site(request).domain
-                    relativeLink = reverse("email_verify")
-                    print(relativeLink)
-
-                    absUrl = (
-                        "http://"
-                        + current_site
-                        + relativeLink
-                        + "?token="
-                        + str(refresh.access_token)  # Make sure to use access token
-                    )
-                    Subject = "Hello " + "Verification pending"
-                    Message = "Click the link to activate your account: \n" + absUrl
-                    send_mail(Subject, Message, EMAIL_HOST_USER, [email])
-
-                    print("pass1")
-                    print(absUrl)
-                    message2 = 1
-                    return render(request, "driver/login.html", {"message2": message2})
-                else:
-                    message1 = 1
-                    return render(request, "driver/signup.html", {"message1": message1})
-    except IntegrityError:
-        print("pass2")
-        return render(request, "driver/signup.html")
-
-    print("pass3")
+    # Render signup form if not a POST request
     return render(request, "driver/signup.html")
-
 
 class VerifyEmail(views.APIView):
     def get(self, request):

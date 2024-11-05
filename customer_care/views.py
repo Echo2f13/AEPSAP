@@ -32,87 +32,50 @@ is_active_verify = False
 
 
 def signup(request):
-    try:
-        if request.user.is_authenticated:
-            return render(request, "customer_care\login.html")
-        else:
-            if request.method == "POST":
-                first_name = request.POST["first_name"]
-                last_name = request.POST["last_name"]
-                username = request.POST["username"]
-                email = request.POST["email"]
-                phone = request.POST["phone"]
-                password = request.POST["password"]
-                gov_id = request.POST["cc_gov_id"]
-                # image = request.FILES['image']
-                # print('image=', image)
-                message1 = 0  # this will be popped when repeated email is used
-                # this will be popped when user created and asked to verify email (student_login page)
-                message2 = 0
-                exists = User.objects.filter(email=email)
-                print("user data=", exists)
-                if not exists:
-                    user = User.objects.create_user(
-                        username=username,
-                        email=email,
-                        password=password,
-                        is_active=is_active_verify,
-                        first_name=first_name,
-                        last_name=last_name,
-                    )
-                    user.save()
-                    print("user created")
-                    care_data = Cc_person.objects.create(
-                        cc_gov_id=gov_id,
-                        phone_number=phone,
-                        user_cc=user,
-                    )
-                    care_data.save()
-                    print("cc created")
-                    print("data received")
-                    c_id_data = Cc_person.objects.filter(cc_gov_id=gov_id).first()
-                    c_id = c_id_data.cc_id
-                    print(c_id)
-                    user_email = User.objects.get(email=email)
-                    print(user_email)
-                    refresh = RefreshToken.for_user(user_email).access_token
-                    print(refresh)
-                    refresh.set_exp(lifetime=timedelta(days=36500))
-                    current_site = get_current_site(request).domain
-                    relativeLink = reverse("email_verify")
-                    print(relativeLink)
-                    Email = email
-                    absUrl = (
-                        "http://"
-                        + current_site
-                        + relativeLink
-                        + "?token="
-                        + str(refresh)
-                    )
-                    Subject = " Hello " + "Verification pending"
-                    Message = "Click below link to activate your account \n " + absUrl
-                    send_mail(Subject, Message, EMAIL_HOST_USER, [Email])
-                    print("pass1")
-                    print(absUrl)
-                    message2 = 1
-                    return render(
-                        request, "customer_care\login.html", {"message2": message2}
-                    )
-                else:
-                    message1 = 1
-                    return render(
-                        request, "customer_care\signup.html", {"message1": message1}
-                    )
-    except IntegrityError:
-        print("pass2")
-        return render(
-            request,
-            "customer_care\signup.html",
-        )
-    print("pass3")
-    return render(request, "customer_care\signup.html")
-    # return render(request, "driver/signup.html")
+    if request.method == "POST":
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        password = request.POST.get("password")
+        gov_id = request.POST.get("cc_gov_id")
 
+        try:
+            # Check if user with email already exists
+            if not User.objects.filter(email=email).exists():
+                # Create inactive user account
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password,
+                    is_active=True,  # Account inactive until verified
+                    first_name=first_name,
+                    last_name=last_name,
+                )
+                user.save()
+
+                # Save additional Customer Care data
+                care_data = Cc_person.objects.create(
+                    cc_gov_id=gov_id,
+                    phone_number=phone,
+                    user_cc=user,
+                )
+                care_data.save()
+                # Redirect to login page with success message
+                return redirect('care_login')
+            else:
+                # If email exists, return error message
+                message1 = "A user with this email already exists."
+                return render(request, "customer_care/signup.html", {"message1": message1})
+
+        except IntegrityError:
+            # Handle database-related errors
+            message1 = "There was an error processing your request. Please try again."
+            return render(request, "customer_care/signup.html", {"message1": message1})
+
+    # Render the signup form if not a POST request
+    return render(request, "customer_care/signup.html")
 
 def login(request):
     if request.method == "POST":
@@ -207,8 +170,18 @@ def dashboard(request, pk):
         },
     )
 
+# URL for the API
+API_URL = "http://192.168.143.39:3000/emergencyProtocol"
 
 def care_case(request, pk):
+    try:
+        response = requests.get(API_URL)
+        response.raise_for_status()
+        data = response.json() 
+        print("successfully displayed the data") # JSON data from the response
+    except requests.exceptions.RequestException as e:
+        print("Error fetching data:", e)
+        data = []  
     return render(
         request,
         "customer_care/care_case.html",
@@ -221,9 +194,57 @@ def care_case(request, pk):
             "accident_types": Case.ACCIDENT_TYPES,
             "severity_levels": Case.SEVERITY_LEVELS,
             "case": Case.objects.all(),
+            'emg_data': data,
         },
     )
 
+
+def decline_api_emg(request, id):
+    print("id :", id)
+    api_url = f"{API_URL}/{id}"
+    print("api url is:",api_url)
+
+    try:
+        response = requests.delete(api_url)
+        if response.status_code == 200:
+            messages.success(request, "Case declined successfully.")
+        else:
+            messages.error(request, "Failed to decline the case.")
+    
+    except requests.RequestException as e:
+        messages.error(request, f"Error: {e}")
+
+    return redirect(
+            "care_case",
+            pk=request.user.id,
+        )  
+
+
+def accept_api_emg(request, id):
+    person_id = int(id)  
+    full_api_url = f"{API_URL}/{id}"  
+    try:
+        response = requests.get(full_api_url)
+        response.raise_for_status()  
+        emg_data = response.json()   
+        print("Fetched emergency data:", emg_data)
+        messages.info(request, f"Fetched data for ID: {id}")
+        
+        request.session['emg_data'] = emg_data
+
+    except requests.exceptions.RequestException as e:
+        messages.error(request, f"Error fetching data: {str(e)}")
+        return redirect(
+                "care_case",
+                pk=request.user.id,
+            )  
+    return redirect(
+            "care_case",
+            pk=request.user.id,
+        )  
+
+
+ 
 
 def add_case(request):
     if request.method == "POST":
@@ -338,8 +359,8 @@ def add_ambulance(request):
             # driver_1_con = True;
         )
         new_ambulance.save()
-        driver_1_id_con = Driver(amb_con = 1)
-        driver_1_id_con.save() 
+        # driver_1_id_con = Driver(amb_con = 1)
+        # driver_1_id_con.save() 
 
         messages.success(request, "Ambulance added successfully.")
         return redirect(
@@ -468,4 +489,7 @@ def logout(request):
     print("logout2")
     return render(request, "customer_care\login.html")
 
+
+import requests
+from django.shortcuts import render
 

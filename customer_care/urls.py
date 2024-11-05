@@ -9,6 +9,11 @@ urlpatterns = [
     path("case/<int:pk>", views.care_case, name="care_case"),
     path("ambulance/<int:pk>", views.care_ambulance, name="care_ambulance"),
     path("add_case/", views.add_case, name="add_case"),
+    
+    path("decline_api_emg/<int:id>", views.decline_api_emg, name="decline_api_emg"),
+    
+    path("accept_api_emg/<int:id>", views.accept_api_emg, name="accept_api_emg"),
+
     path("add-ambulance/", views.add_ambulance, name="add_ambulance"),
     path("hospital/<int:pk>", views.care_hospital, name="care_hospital"),
     path("add-hospital/", views.add_hospital, name="add_hospital"),
