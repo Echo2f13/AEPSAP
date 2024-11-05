@@ -57,7 +57,7 @@ def case_page(request, pk):
         "case/case.html",
         {
             "case": Case.objects.filter(case_id=pk).first(),
-            "google_maps_api_key": "AIzaSyCfs2EPBwjylYC_6twmdwnIFXUlc5LkaH0",
+            "google_maps_api_key": "user you map API key here",
             "location_lat": location_lat,
             "location_lng": location_lng,
             "amb_location_lat": amb_location_lat,
